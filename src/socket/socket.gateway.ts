@@ -17,7 +17,7 @@ import { Server, Socket } from 'socket.io';
 export class SocketGateway {
   @WebSocketServer()
   server: Server;
-
+  pingInterval: any;
   handleConnection(client: Socket) {
     client.broadcast.emit('joined-user', {
       id: client.id,
@@ -27,7 +27,28 @@ export class SocketGateway {
     client.broadcast.emit('left-user', {
       id: client.id,
     });
+    clearInterval(this.pingInterval);
   }
+  @SubscribeMessage('startPing')
+  startPing(client: Socket, payload: string): void {
+    console.log('Ping started');
+    this.pingInterval = setInterval(() => {
+      const startTime = new Date().getTime();
+      client.emit('ping', startTime);
+    }, 1000);
+  }
+  @SubscribeMessage('pong')
+  pong(client: Socket, startTime: any): void {
+    const endTime = new Date().getTime();
+    const pingTime = endTime - startTime;
+    client.emit('pingResult', pingTime);
+  }
+  @SubscribeMessage('stopPing')
+  stopPing(client: Socket, payload: string): void {
+    console.log('Ping stopped');
+    clearInterval(this.pingInterval);
+  }
+
   @SubscribeMessage('get-users')
   handleMessage(client: Socket, payload: string): void {
     const userObjects = Array.from(this.server.sockets.sockets.keys())
