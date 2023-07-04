@@ -37,12 +37,14 @@ export class SocketGateway {
       client.emit('ping', startTime);
     }, 1000);
   }
+
   @SubscribeMessage('pong')
   pong(client: Socket, startTime: any): void {
     const endTime = new Date().getTime();
     const pingTime = endTime - startTime;
     client.emit('pingResult', pingTime);
   }
+
   @SubscribeMessage('stopPing')
   stopPing(client: Socket, payload: string): void {
     console.log('Ping stopped');
@@ -54,7 +56,10 @@ export class SocketGateway {
     const userObjects = Array.from(this.server.sockets.sockets.keys())
       .filter((clientId) => clientId !== client.id)
       .map((clientId) => {
-        return { id: clientId };
+        return {
+          id: clientId,
+          name: this.server.sockets.sockets.get(clientId).handshake.query.name,
+        };
       });
     client.emit('users', userObjects);
   }
@@ -85,6 +90,15 @@ export class SocketGateway {
     console.log(213);
     client.broadcast.emit('remote-open-fire', {
       id: client.id,
+    });
+  }
+  @SubscribeMessage('set-name')
+  handleSet(client: Socket, payload: any): void {
+    client.handshake.query.name = payload;
+    client.emit('set-name', payload);
+    client.broadcast.emit('remote-set-name', {
+      id: client.id,
+      name: payload,
     });
   }
 }
