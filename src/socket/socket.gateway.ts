@@ -31,7 +31,6 @@ export class SocketGateway {
   }
   @SubscribeMessage('startPing')
   startPing(client: Socket, payload: string): void {
-    console.log('Ping started');
     this.pingInterval = setInterval(() => {
       const startTime = new Date().getTime();
       client.emit('ping', startTime);
@@ -47,7 +46,6 @@ export class SocketGateway {
 
   @SubscribeMessage('stopPing')
   stopPing(client: Socket, payload: string): void {
-    console.log('Ping stopped');
     clearInterval(this.pingInterval);
   }
 
@@ -87,7 +85,6 @@ export class SocketGateway {
   }
   @SubscribeMessage('triggerFiring')
   handleTriggerFiring(client: Socket, payload: any): void {
-    console.log(213);
     client.broadcast.emit('remote-open-fire', {
       id: client.id,
     });
@@ -99,6 +96,14 @@ export class SocketGateway {
     client.broadcast.emit('remote-set-name', {
       id: client.id,
       name: payload,
+    });
+  }
+  @SubscribeMessage('hit')
+  handlePlayerHit(client: Socket, payload: any): void {
+    client.emit('blowup-player');
+    client.broadcast.emit('remote-hit', {
+      id: client.id,
+      position: payload,
     });
   }
 }
