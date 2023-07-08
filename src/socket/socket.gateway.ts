@@ -76,6 +76,13 @@ export class SocketGateway {
       position: payload,
     });
   }
+  @SubscribeMessage('hand-break')
+  handleHandBreak(client: Socket, payload: any): void {
+    client.broadcast.emit('remote-hand-break', {
+      id: client.id,
+      position: payload,
+    });
+  }
   @SubscribeMessage('turret-rotation')
   handleTurretRotation(client: Socket, payload: any): void {
     client.broadcast.emit('remote-turret-rotation', {
