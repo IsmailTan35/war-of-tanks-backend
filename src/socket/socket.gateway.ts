@@ -18,6 +18,19 @@ export class SocketGateway {
   @WebSocketServer()
   server: Server;
   pingInterval: any;
+  seed: number;
+  setInterval: any;
+  generateTenDigitNumber() {
+    const min = 1000000000;
+    const max = 9999999999;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  constructor() {
+    this.seed = this.generateTenDigitNumber();
+    setInterval(() => {
+      this.seed = this.generateTenDigitNumber();
+    }, 10 * 60 * 1000);
+  }
   handleConnection(client: Socket) {
     client.broadcast.emit('joined-user', {
       id: client.id,
@@ -111,6 +124,18 @@ export class SocketGateway {
     client.broadcast.emit('remote-hit', {
       id: client.id,
       position: payload,
+    });
+  }
+  @SubscribeMessage('send-seed')
+  handleGetSeed(client: Socket, payload: any): void {
+    console.log(this.seed);
+    client.emit('get-seed', this.seed);
+  }
+  @SubscribeMessage('dead')
+  handleDead(client: Socket, payload: any): void {
+    client.broadcast.emit('remote-dead', {
+      killerId: payload.killerId,
+      victimId: client.id,
     });
   }
 }
