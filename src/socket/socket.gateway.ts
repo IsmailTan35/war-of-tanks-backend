@@ -110,9 +110,9 @@ export class SocketGateway {
       id: client.id,
     });
   }
-  @SubscribeMessage('triggerMachineGun')
+  @SubscribeMessage('triggerFiringMachineGun')
   handleTriggerMachineGun(client: Socket, payload: any): void {
-    client.broadcast.emit('remote-open-fire-machine-gun', {
+    client.broadcast.emit('remote-open-firing-machine-gun', {
       id: client.id,
     });
   }
